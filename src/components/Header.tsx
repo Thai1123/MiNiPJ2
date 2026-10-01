@@ -34,6 +34,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenKiosk }) => {
               <Text style={styles.titleLive}>LIVE</Text>
             </View>
             <Text style={styles.subtitle}>Đặt Phòng Học & Lab Realtime</Text>
+            <Text style={styles.userName}>Văn Thái</Text>
           </View>
         </View>
 
@@ -141,6 +142,12 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#94A3B8',
     marginTop: 1,
+  },
+  userName: {
+    fontSize: 12,
+    color: '#38BDF8',
+    fontWeight: '700',
+    marginTop: 2,
   },
   actionsRow: {
     flexDirection: 'row',

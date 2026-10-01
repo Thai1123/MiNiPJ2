@@ -84,7 +84,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       endTime,
       purpose: fullPurpose,
       participants,
-      bookedBy: 'Văn Quyền (Bạn)',
+      bookedBy: 'Văn Thái (Bạn)',
       userRole: 'Sinh viên',
     });
 

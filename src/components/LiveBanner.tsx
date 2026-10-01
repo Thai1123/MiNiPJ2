@@ -17,7 +17,7 @@ export const LiveBanner: React.FC<LiveBannerProps> = ({ onPressBooking }) => {
   const myTodayBookings = bookings.filter(
     (b) =>
       b.date === todayStr &&
-      b.bookedBy.includes('Văn Quyền') &&
+      b.bookedBy.includes('Văn Thái') &&
       b.status !== 'cancelled' &&
       b.status !== 'completed'
   );

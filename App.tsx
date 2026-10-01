@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -20,15 +20,23 @@ import { TimeSlotGrid } from './src/components/TimeSlotGrid';
 import { BookingModal } from './src/components/BookingModal';
 import { PassCard } from './src/components/PassCard';
 import { KioskDisplay } from './src/components/KioskDisplay';
+import { RoomDetailScreen } from './src/screens/RoomDetailScreen';
+import { BookingScreen } from './src/screens/BookingScreen';
+import { MyBookingsScreen } from './src/screens/MyBookingsScreen';
+import { useBookingStore } from './src/store/useBookingStore';
 import { Room } from './src/types';
-
 type TabType = 'rooms' | 'schedule' | 'passes';
 type ViewMode = 'list' | 'map';
+
+type ScreenType = 'main' | 'roomDetail' | 'booking';
 
 const MainScreen: React.FC = () => {
   const { rooms, bookings } = useBooking();
 
   // Navigation State
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>('main');
+  const [selectedRoomDetail, setSelectedRoomDetail] = useState<Room | null>(null);
+
   const [activeTab, setActiveTab] = useState<TabType>('rooms');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
 
@@ -61,6 +69,16 @@ const MainScreen: React.FC = () => {
     setBookingModalVisible(true);
   };
 
+  const handleOpenRoomDetail = (room: Room) => {
+    setSelectedRoomDetail(room);
+    setCurrentScreen('roomDetail');
+  };
+
+  const handleOpenBookingScreen = (room: Room) => {
+    setSelectedRoomDetail(room);
+    setCurrentScreen('booking');
+  };
+
   const handleOpenKiosk = (room?: Room) => {
     setKioskRoom(room || null);
     setKioskVisible(true);
@@ -83,8 +101,36 @@ const MainScreen: React.FC = () => {
     return true;
   });
 
-  // Filter My Bookings
-  const myBookings = bookings.filter((b) => b.bookedBy.includes('Văn Quyền'));
+  const zustandBookings = useBookingStore(state => state.bookings);
+  const user = useBookingStore(state => state.user);
+  const login = useBookingStore(state => state.login);
+  const currentUserId = user?.id || 'user-1';
+  const myActiveBookingsCount = zustandBookings.filter(b => b.userId === currentUserId && b.status === 'active').length;
+
+  useEffect(() => {
+    if (!user || user.name !== 'Văn Thái') {
+      login({ id: currentUserId, name: 'Văn Thái' });
+    }
+  }, [user, login, currentUserId]);
+
+  if (currentScreen === 'roomDetail' && selectedRoomDetail) {
+    return (
+      <RoomDetailScreen
+        room={selectedRoomDetail}
+        onBack={() => setCurrentScreen('main')}
+        onBook={(room) => handleOpenBookingScreen(room)}
+      />
+    );
+  }
+
+  if (currentScreen === 'booking' && selectedRoomDetail) {
+    return (
+      <BookingScreen
+        room={selectedRoomDetail}
+        onBack={() => setCurrentScreen('roomDetail')}
+      />
+    );
+  }
 
   return (
     <SafeAreaView style={styles.root}>
@@ -152,7 +198,7 @@ const MainScreen: React.FC = () => {
 
             {/* If Floor Map View */}
             {viewMode === 'map' ? (
-              <FloorMap onSelectRoom={(room) => handleOpenBooking(room)} />
+              <FloorMap onSelectRoom={(room) => handleOpenRoomDetail(room)} />
             ) : (
               /* If List View: Search, Filter pills, and Room Cards */
               <View>
@@ -214,6 +260,7 @@ const MainScreen: React.FC = () => {
                     room={room}
                     onOpenBookingModal={(r) => handleOpenBooking(r)}
                     onOpenKioskRoom={(r) => handleOpenKiosk(r)}
+                    onOpenRoomDetail={(r) => handleOpenRoomDetail(r)}
                   />
                 ))}
               </View>
@@ -232,35 +279,7 @@ const MainScreen: React.FC = () => {
 
         {/* TAB 3: MY PASSES & QR CHECK-IN */}
         {activeTab === 'passes' && (
-          <View>
-            <View style={styles.passesHeader}>
-              <Text style={styles.passesTitle}>VÉ ĐẶT PHÒNG CỦA BẠN</Text>
-              <Text style={styles.passesSubtitle}>
-                Tổng cộng {myBookings.length} lịch đặt (Đưa mã QR trước cửa để check-in)
-              </Text>
-            </View>
-
-            {myBookings.length === 0 ? (
-              <View style={styles.emptyPasses}>
-                <Ionicons name="ticket-outline" size={48} color="#475569" />
-                <Text style={styles.emptyTitle}>Chưa có vé đặt nào</Text>
-                <Text style={styles.emptyDesc}>
-                  Hãy chọn một phòng Lab ở tab "Phòng Lab" hoặc chọn giờ ở tab "Lịch Đặt" để tạo vé ngay!
-                </Text>
-                <TouchableOpacity
-                  style={styles.exploreBtn}
-                  onPress={() => setActiveTab('rooms')}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.exploreBtnText}>Khám Phá Phòng Lab</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              myBookings.map((booking) => (
-                <PassCard key={booking.id} booking={booking} />
-              ))
-            )}
-          </View>
+          <MyBookingsScreen />
         )}
       </ScrollView>
 
@@ -317,9 +336,9 @@ const MainScreen: React.FC = () => {
               size={22}
               color={activeTab === 'passes' ? '#38BDF8' : '#94A3B8'}
             />
-            {myBookings.length > 0 && (
+            {myActiveBookingsCount > 0 && (
               <View style={styles.navBadge}>
-                <Text style={styles.navBadgeText}>{myBookings.length}</Text>
+                <Text style={styles.navBadgeText}>{myActiveBookingsCount}</Text>
               </View>
             )}
           </View>

@@ -113,6 +113,7 @@ export const PassCard: React.FC<PassCardProps> = ({ booking }) => {
 
         <Text style={styles.roomName}>{booking.roomName}</Text>
         <Text style={styles.buildingText}>{booking.building}</Text>
+        <Text style={styles.holderText}>Người đặt: {booking.bookedBy}</Text>
 
         {/* Date & Time Row */}
         <View style={styles.scheduleRow}>
@@ -306,6 +307,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#94A3B8',
     marginTop: 2,
+  },
+  holderText: {
+    fontSize: 12,
+    color: '#38BDF8',
+    fontWeight: '600',
+    marginTop: 6,
   },
   scheduleRow: {
     flexDirection: 'row',

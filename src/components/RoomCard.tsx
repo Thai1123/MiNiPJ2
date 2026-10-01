@@ -9,12 +9,14 @@ interface RoomCardProps {
   room: Room;
   onOpenBookingModal: (room: Room) => void;
   onOpenKioskRoom: (room: Room) => void;
+  onOpenRoomDetail: (room: Room) => void;
 }
 
 export const RoomCard: React.FC<RoomCardProps> = ({
   room,
   onOpenBookingModal,
   onOpenKioskRoom,
+  onOpenRoomDetail,
 }) => {
   const { getRoomStatus, quickBook } = useBooking();
   const roomStatus = getRoomStatus(room.id);
@@ -41,7 +43,11 @@ export const RoomCard: React.FC<RoomCardProps> = ({
   };
 
   return (
-    <View style={styles.cardContainer}>
+    <TouchableOpacity
+      style={styles.cardContainer}
+      onPress={() => onOpenRoomDetail(room)}
+      activeOpacity={0.9}
+    >
       {/* Room Image with Realtime Status Badge */}
       <View style={styles.imageContainer}>
         <Image source={{ uri: room.imageUrl }} style={styles.image} resizeMode="cover" />
@@ -168,7 +174,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
